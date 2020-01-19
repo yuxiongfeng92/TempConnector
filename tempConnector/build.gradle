@@ -52,7 +52,34 @@ dependencies {
 //    implementation 'com.proton.temp:algorithm:1.1.6'  //对应算法版本  -->8月14日邮件 BA_1.5_3.1.9
 //    implementation 'com.proton.temp:algorithm:1.1.7'    //对应算法版本    -->10月14日邮件 BA_1.5_3.2.1
     implementation 'com.wms:logger:1.0.1'
-
-    implementation 'com.proton.algorithm:tempAlgorithm:1.0.1-alpha3'
-
+    implementation 'com.proton.algorithm:tempAlgorithm:1.0.2-alpha7'//更新了一代体温贴算法
 }
+
+ext {
+    package_userOrg = '' //  组织名或者用户名 不填默认用户名  手动上传的时候jcenter目录：/com/proton/temp/tempConnector/1.0.2-alpha9
+    package_repo = 'coreMaven' // bintray上的仓库名，就是我们在第二步中创建的仓库名字，如果package_userOrg设置的为组织名，那么这个仓库名得属于组织的
+    package_type = 'aar'  // 输出类型
+    package_group = 'com.proton.temp' // JCenter的GroupId
+    package_artifact = 'tempConnector' // JCenter的ArtifactId
+    package_version = '1.0.2-alpha9'  // JCenter的VersionId
+    package_description = 'A tools for tempAlgorithm'
+
+    siteUrl = 'https://dl.bintray.com/yxf22/coreMaven'
+    gitUrl = 'https://github.com/yuxiongfeng92/TempConnector'
+
+    //开发者信息
+    developerId = 'yu'
+    developerName = 'xiongfeng'
+    developerEmail = 'yuxiongfeng7@gmail.com'
+
+    //开源协议
+    licenseName = 'The Apache Software License, Version 2.0'
+
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = 'Apache-2.0'
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+apply from: './bintray.gradle'
+
