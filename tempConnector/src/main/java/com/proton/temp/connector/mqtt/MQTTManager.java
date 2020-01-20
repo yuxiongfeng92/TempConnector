@@ -146,8 +146,7 @@ public class MQTTManager {
         @Override
         public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
             Logger.w("mqtt连接失败:", exception, ",缓存topic:", mCacheTopics.size());
-            int code = ((MqttException) exception).getReasonCode();
-            if (code == 32100) {
+            if (exception instanceof MqttException && ((MqttException) exception).getReasonCode() == 32100) {
                 //已经连接直接订阅
                 dealWithCacheTopic();
             } else {

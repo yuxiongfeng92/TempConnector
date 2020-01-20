@@ -56,12 +56,12 @@ dependencies {
 }
 
 ext {
-    package_userOrg = '' //  组织名或者用户名 不填默认用户名  手动上传的时候jcenter目录：/com/proton/temp/tempConnector/1.0.2-alpha9
+    package_userOrg = '' //  组织名或者用户名 不填默认用户名  手动上传的时候jcenter目录：/com/proton/temp/tempConnector/1.0.3
     package_repo = 'coreMaven' // bintray上的仓库名，就是我们在第二步中创建的仓库名字，如果package_userOrg设置的为组织名，那么这个仓库名得属于组织的
     package_type = 'aar'  // 输出类型
     package_group = 'com.proton.temp' // JCenter的GroupId
     package_artifact = 'tempConnector' // JCenter的ArtifactId
-    package_version = '1.0.2-alpha9'  // JCenter的VersionId
+    package_version = '1.0.3'  // JCenter的VersionId
     package_description = 'A tools for tempAlgorithm'
 
     siteUrl = 'https://dl.bintray.com/yxf22/coreMaven'
