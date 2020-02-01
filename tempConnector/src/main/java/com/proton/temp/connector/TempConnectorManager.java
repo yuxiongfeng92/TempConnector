@@ -542,7 +542,6 @@ public class TempConnectorManager {
             mCurrentTemp.setMeasureStatus(measureStatus);
             mCurrentTemp.setGesture(gesture);
             mCurrentTemp.setPercent(percent);
-            mCurrentTemp.setAlgorithmTemp(processTemp);
             mCurrentTemp.setAlgorithmVerType(getConnectionType() == ConnectionType.NET ? 1 : 0);
             mAllTemps.add(mCurrentTemp);
 
@@ -556,6 +555,7 @@ public class TempConnectorManager {
             boolean hasReceiveAllTemp = mCurrentSize >= mCurrentTempSize;
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.receiveCurrentTemp(processTemp);
+                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(),processTemp);
                 connectorListener.receiveCurrentTemp(processTemp, mCurrentTempTime);
                 if (hasReceiveAllTemp) {
                     connectorListener.receiveCurrentTemp(new ArrayList<>(mCurrentTempDataList));
@@ -850,6 +850,7 @@ public class TempConnectorManager {
             mLowestTemp = Math.min(mCurrentTemp.getTemp(), mLowestTemp);
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp());
+                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(),mCurrentTemp.getAlgorithmTemp());
             }
             mAllTemps.add(mCurrentTemp);
         }

@@ -61,7 +61,7 @@ ext {
     package_type = 'aar'  // 输出类型
     package_group = 'com.proton.temp' // JCenter的GroupId
     package_artifact = 'tempConnector' // JCenter的ArtifactId
-    package_version = '1.0.3'  // JCenter的VersionId
+    package_version = '1.0.4'  // JCenter的VersionId
     package_description = 'A tools for tempAlgorithm'
 
     siteUrl = 'https://dl.bintray.com/yxf22/coreMaven'
