@@ -3,6 +3,7 @@ package com.yxf.tempconnector;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.proton.temp.connector.TempConnectorManager;
 
 
 public class MainActivity extends AppCompatActivity {

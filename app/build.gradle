@@ -26,6 +26,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-//    implementation 'com.proton.algorithm:tempAlgorithm:1.0.1-alpha3'
-    implementation project(':tempConnector')
+//    implementation project(':tempConnector')
+//    implementation 'com.proton.temp:tempConnector:1.0.3'
+    implementation 'com.yxf.util:blufili:1.0.5-alpha2'
+    implementation 'com.yxf.glideimageview:GlideImageView:1.0.0-alpha04'
+
 }
