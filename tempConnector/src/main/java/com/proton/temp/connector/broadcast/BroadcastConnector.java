@@ -59,6 +59,17 @@ public class BroadcastConnector implements Connector {
      * 数据接收超时时间
      */
     private long disconnectTimeout = ConnectorSetting.BROADCAST_DISCONNECT_TIMEOUT;
+
+    /**
+     * 使用场景：蓝牙连接切换到蓝牙广播的时候过滤掉第一包数据
+     * 是否过滤掉第一包数据 true：过滤掉第一包数据  false：不过滤
+     */
+    private boolean isFilterFirstInvalidPackageData;
+
+    public void setFilterFirstPackageData(boolean isFilter) {
+        isFilterFirstInvalidPackageData = isFilter;
+    }
+
     private OnScanListener mScanCallback = new com.wms.ble.callback.OnScanListener() {
 
         @Override
@@ -104,6 +115,12 @@ public class BroadcastConnector implements Connector {
                 dataListener.receiveHardVersion(BroadcastUtils.getHardVersionByBroadcast(scanRecord));
             }
 
+            //判断是否需要过滤掉第一包数据
+            if (isFilterFirstInvalidPackageData ) {
+                Logger.w("蓝牙连接切换到蓝牙广播，过滤掉第一包数据");
+                isFilterFirstInvalidPackageData = false;
+                return;
+            }
             int packageNum = BroadcastUtils.getPackageNumber(scanRecord);
             if (packageNum == mLastPackageNumber) return;
             if (packageNum - mLastPackageNumber != 1 && mLastPackageNumber != -1) {

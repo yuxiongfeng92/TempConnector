@@ -156,6 +156,12 @@ public class TempConnectorManager {
      * 连接方式监听器
      */
     private List<ConnectionTypeListener> connectTypeListener = new ArrayList<>();
+
+    /**
+     * 是否是蓝牙切换到蓝牙广播
+     */
+    private boolean isBluetooth2Broadcast = false;
+
     /**
      * 算法数据接收
      */
@@ -384,6 +390,12 @@ public class TempConnectorManager {
      * 设置连接方式，必须在调用connect方法之前调用
      */
     public TempConnectorManager setConnectionType(ConnectionType connectionType) {
+
+        if (connectionType == getConnectionType()) {
+            Logger.w("不要重复指定相同连接类型");
+            return this;
+        }
+
         if (mDeviceBean.getDeviceType() == DeviceType.P02) {
             mConnector = BleConnector.getInstance(patchMacaddress, false);
             doConnectionTypeCallback();
@@ -398,9 +410,13 @@ public class TempConnectorManager {
             //如果是从网络切换到蓝牙或者广播
             throw new IllegalArgumentException("you should set patchMacaddress before you switch to net connect");
         }
+
         switch (connectionType) {
             case BROADCAST:
                 mConnector = new BroadcastConnector(patchMacaddress);
+                if (isBluetooth2Broadcast) {
+                    ((BroadcastConnector) mConnector).setFilterFirstPackageData(true);
+                }
                 break;
             case BLUETOOTH:
                 mConnector = BleConnector.getInstance(patchMacaddress, true);
@@ -435,6 +451,16 @@ public class TempConnectorManager {
         if (connectionType == ConnectionType.NET && TextUtils.isEmpty(dockerMacaddress)) {
             throw new IllegalArgumentException("you should set dockerMacaddress before you switch to net connect");
         }
+
+        //判断是否是蓝牙连接切换到广播连接
+        if (connectionType == ConnectionType.BROADCAST) {
+            if (getConnectionType() == ConnectionType.BLUETOOTH) {
+                isBluetooth2Broadcast = true;
+            }
+        } else {
+            isBluetooth2Broadcast = false;
+        }
+
         setConnectionType(connectionType);
         mConnector.connect(connectStatusListener, mDataListener);
         return this;
@@ -832,7 +858,7 @@ public class TempConnectorManager {
             connectorListener.receiveRawTemp(currentTemp.getTemp());
         }
 
-        if (mCurrentTemp!=null) {
+        if (mCurrentTemp != null) {
             if (getConnectionType() == ConnectionType.BLUETOOTH) {
                 mSamples.add(currentTemp.getSample());
             } else {
