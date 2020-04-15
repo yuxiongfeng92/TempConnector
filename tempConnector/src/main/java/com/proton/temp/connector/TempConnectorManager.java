@@ -391,8 +391,11 @@ public class TempConnectorManager {
      */
     public TempConnectorManager setConnectionType(ConnectionType connectionType) {
 
-        if (connectionType == getConnectionType()) {
-            Logger.w("不要重复指定相同连接类型");
+        /**
+         * 主要是为了兼容初始化时候重复指定连接方式造成问题
+         */
+        if (mConnector != null && connectionType == getConnectionType() && getConnectionType() != null) {
+            Logger.w("不要重复指定相同类型");
             return this;
         }
 
@@ -581,7 +584,7 @@ public class TempConnectorManager {
             boolean hasReceiveAllTemp = mCurrentSize >= mCurrentTempSize;
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.receiveCurrentTemp(processTemp);
-                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(),processTemp);
+                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(), processTemp);
                 connectorListener.receiveCurrentTemp(processTemp, mCurrentTempTime);
                 if (hasReceiveAllTemp) {
                     connectorListener.receiveCurrentTemp(new ArrayList<>(mCurrentTempDataList));
@@ -876,7 +879,7 @@ public class TempConnectorManager {
             mLowestTemp = Math.min(mCurrentTemp.getTemp(), mLowestTemp);
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp());
-                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(),mCurrentTemp.getAlgorithmTemp());
+                connectorListener.receiveCurrentTemp(mCurrentTemp.getTemp(), mCurrentTemp.getAlgorithmTemp());
             }
             mAllTemps.add(mCurrentTemp);
         }
