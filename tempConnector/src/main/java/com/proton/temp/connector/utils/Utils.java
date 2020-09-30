@@ -6,13 +6,14 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.proton.temp.connector.bean.ConnectorListener;
 import com.proton.temp.connector.bean.DeviceType;
 import com.proton.temp.connector.bean.DockerDataBean;
 import com.proton.temp.connector.bluetooth.utils.BleUtils;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -124,7 +125,7 @@ public class Utils {
         try {
             return jObj.getString(key);
         } catch (JSONException e) {
-            Logger.w(e.toString());
+//            Logger.w(e.toString());
         }
         return "";
     }
@@ -133,7 +134,8 @@ public class Utils {
         try {
             return new JSONObject(jsonStr);
         } catch (JSONException e) {
-            Logger.w(e.toString());
+//            Logger.w(e.toString());
+            Log.w("temp_connect",e.toString());
         }
         return null;
     }

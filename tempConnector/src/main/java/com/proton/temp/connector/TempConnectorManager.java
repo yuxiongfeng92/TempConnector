@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.proton.temp.algorithm.AlgorithmManager;
 import com.proton.temp.algorithm.bean.AlgorithmData;
@@ -26,7 +29,7 @@ import com.proton.temp.connector.interfaces.Connector;
 import com.proton.temp.connector.interfaces.DataListener;
 import com.proton.temp.connector.mqtt.MQTTConnector;
 import com.proton.temp.connector.utils.Utils;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +43,7 @@ import java.util.Objects;
  */
 @SuppressLint("StaticFieldLeak")
 public class TempConnectorManager {
+    public static final String TAG = "temp_connector : ";
     private static Context mContext;
     /**
      * 设备管理器
@@ -162,6 +166,8 @@ public class TempConnectorManager {
      */
     private boolean isBluetooth2Broadcast = false;
 
+    private Handler mHandle=new Handler(Looper.getMainLooper());
+
     /**
      * 算法数据接收
      */
@@ -178,7 +184,8 @@ public class TempConnectorManager {
         public void onReceive(Context context, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 if (Utils.isConnected(mContext)) {
-                    Logger.w("网络连接成功");
+//                    Logger.w("网络连接成功");
+                    Log.w(TAG, "网络连接成功");
                     if (isFirstReceiveNetChange) {
                         isFirstReceiveNetChange = false;
                         return;
@@ -209,7 +216,8 @@ public class TempConnectorManager {
 
         @Override
         public void onConnectSuccess() {
-            Logger.w("连接成功:", patchMacaddress);
+//            Logger.w("连接成功:", patchMacaddress);
+            Log.w(TAG, "连接成功");
             mCurrentReconnectCount = 0;
             for (ConnectStatusListener listener : connectStatusListeners) {
                 listener.onConnectSuccess();
@@ -222,13 +230,15 @@ public class TempConnectorManager {
         public void onConnectFaild() {
             connectStatus = 1;
             reconnect();
-            Logger.w("onConnectFaild....");
+//            Logger.w("onConnectFaild....");
+            Log.w(TAG, "onConnectFaild....");
         }
 
         @Override
         public void onDisconnect(boolean isManual) {
             mDisconnectTime = System.currentTimeMillis();
-            Logger.w("onDisconnect....");
+//            Logger.w("onDisconnect....");
+            Log.w(TAG, "onDisconnect....");
             connectStatus = 1;
             if (getConnectionType().equals(ConnectionType.NET)) {
                 List<ConnectStatusListener> listeners = new ArrayList<>(connectStatusListeners);
@@ -252,7 +262,8 @@ public class TempConnectorManager {
             for (ConnectStatusListener listener : connectStatusListeners) {
                 listener.receiveDockerOffline(isOffline);
             }
-            Logger.w("底座是否下线:", isOffline);
+//            Logger.w("底座是否下线:", isOffline);
+            Log.w(TAG, "底座是否下线:" + isOffline);
         }
     };
     /**
@@ -308,12 +319,14 @@ public class TempConnectorManager {
                 connectorListener.receiveBattery(battery);
             }
             mBattery = battery;
-            Logger.w("电量:", battery, ",mac = ", patchMacaddress);
+//            Logger.w("电量:", battery, ",mac = ", patchMacaddress);
+            Log.w(TAG, "电量:" + battery + ",mac =" + patchMacaddress);
         }
 
         @Override
         public void receiveCharge(boolean isCharge) {
-            Logger.w("充电:", isCharge, ",mac = ", patchMacaddress);
+//            Logger.w("充电:", isCharge, ",mac = ", patchMacaddress);
+            Log.w(TAG, "充电:" + isCharge + ",mac =" + patchMacaddress);
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.receiveCharge(isCharge);
             }
@@ -333,7 +346,8 @@ public class TempConnectorManager {
             }
 
             mHardVersion = hardVersion;
-            Logger.w("硬件版本:", mHardVersion, ",mac = ", patchMacaddress);
+//            Logger.w("硬件版本:", mHardVersion, ",mac = ", patchMacaddress);
+            Log.w(TAG, "硬件版本:" + mHardVersion + ",mac =" + patchMacaddress);
         }
 
         @Override
@@ -364,7 +378,8 @@ public class TempConnectorManager {
 
         @Override
         public void judgeCarepatchEnable(boolean isEnable) {
-            Logger.w("体温贴是否可用:", isEnable, ",mac = ", patchMacaddress);
+//            Logger.w("体温贴是否可用:", isEnable, ",mac = ", patchMacaddress);
+            Log.w(TAG, "体温贴是否可用:" + isEnable + ",mac =" + patchMacaddress);
             for (DataListener connectorListener : mDataListeners) {
                 connectorListener.judgeCarepatchEnable(isEnable);
             }
@@ -395,7 +410,8 @@ public class TempConnectorManager {
          * 主要是为了兼容初始化时候重复指定连接方式造成问题
          */
         if (mConnector != null && connectionType == getConnectionType() && getConnectionType() != null) {
-            Logger.w("不要重复指定相同类型");
+//            Logger.w("不要重复指定相同类型");
+            Log.w(TAG, "不要重复指定相同类型");
             return this;
         }
 
@@ -433,7 +449,8 @@ public class TempConnectorManager {
                 break;
         }
         doConnectionTypeCallback();
-        Logger.w("连接方式:", getConnectionType(), ",mac:", patchMacaddress);
+//        Logger.w("连接方式:", getConnectionType(), ",mac:", patchMacaddress);
+        Log.w(TAG, "连接方式:" + getConnectionType() + " ,mac:" + patchMacaddress);
         return this;
     }
 
@@ -527,14 +544,14 @@ public class TempConnectorManager {
     public static void init(Context context, MQTTConfig mqttConfig) {
         mContext = context;
         //初始化日志
-        Logger.newBuilder()
-                .tag("temp_connector")
-                .showThreadInfo(false)
-                .methodCount(1)
-                .context(mContext)
-                .saveFile(BuildConfig.DEBUG)
-                .isDebug(BuildConfig.DEBUG)
-                .build();
+//        Logger.newBuilder()
+//                .tag("temp_connector")
+//                .showThreadInfo(false)
+//                .methodCount(1)
+//                .context(mContext)
+//                .saveFile(BuildConfig.DEBUG)
+//                .isDebug(BuildConfig.DEBUG)
+//                .build();
         BleConnector.init(context);
         setMQTTConfig(mqttConfig);
     }
@@ -576,7 +593,8 @@ public class TempConnectorManager {
 
             //在这里接入sample和type，smaple和type数据和其他数据数组大小不一致
 
-            Logger.w("当前算法温度:", mCurrentTemp.getAlgorithmTemp(), ",连接方式:", getConnectionType(), ",测量状态:", mCurrentTemp.getMeasureStatus(), ",mac:", patchMacaddress);
+//            Logger.w("当前算法温度:", mCurrentTemp.getAlgorithmTemp(), ",连接方式:", getConnectionType(), ",测量状态:", mCurrentTemp.getMeasureStatus(), ",mac:", patchMacaddress);
+            Log.w(TAG, "当前算法温度:" + mCurrentTemp.getAlgorithmTemp() + " ,连接方式:" + getConnectionType() + " ,测量状态:" + mCurrentTemp.getMeasureStatus() + " ,mac:" + patchMacaddress);
             mHighestTemp = Math.max(processTemp, mHighestTemp);
             mLowestTemp = Math.min(processTemp, mLowestTemp);
 
@@ -635,7 +653,8 @@ public class TempConnectorManager {
         addConnectStatusListener(statusListener);
         addDataListener(dataListener);
         if (mConnector.isConnected()) {
-            Logger.w("已经连接了:", patchMacaddress, ",监听器数量:", mDataListeners.size());
+//            Logger.w("已经连接了:", patchMacaddress, ",监听器数量:", mDataListeners.size());
+            Log.w(TAG, "已经连接了:" + patchMacaddress + ",监听器数量:" + mDataListeners.size());
             if (statusListener != null) {
                 statusListener.onConnectSuccess();
             } else {
@@ -689,7 +708,8 @@ public class TempConnectorManager {
         }
         if (mCurrentReconnectCount >= mReconnectCount) {
             //不重新连接了
-            Logger.w("重连失败,尝试次数:", mCurrentReconnectCount);
+//            Logger.w("重连失败,尝试次数:", mCurrentReconnectCount);
+            Log.w(TAG, "重连失败,尝试次数:" + mCurrentReconnectCount);
             for (ConnectStatusListener listener : listeners) {
                 listener.onDisconnect(false);
             }
@@ -707,7 +727,8 @@ public class TempConnectorManager {
 
         mCurrentReconnectCount++;
 
-        Logger.w("重连:", patchMacaddress, ",剩余重连次数:", (mReconnectCount - mCurrentReconnectCount));
+//        Logger.w("重连:", patchMacaddress, ",剩余重连次数:", (mReconnectCount - mCurrentReconnectCount));
+        Log.d(TAG, "重连:" + patchMacaddress + ",剩余重连次数:" + (mReconnectCount - mCurrentReconnectCount));
         for (ConnectStatusListener listener : listeners) {
             listener.receiveReconnectTimes(mCurrentReconnectCount, mReconnectCount - mCurrentReconnectCount, totalReConnectTime);
         }
@@ -745,28 +766,34 @@ public class TempConnectorManager {
     }
 
     public void disConnect() {
-        Logger.w("手动断开连接:", patchMacaddress);
-        checkConnector();
-        mCurrentTempDataList.clear();
-        mSamples.clear();
-        mConnectionType.clear();
-        //取消重连
-        mCurrentTemp = new TempDataBean();
-        mAllTemps.clear();
-        isAutoReconnect = false;
-        for (ConnectStatusListener listener : connectStatusListeners) {
-            listener.onDisconnect(true);
-        }
-        connectStatusListeners.clear();
-        mDataListeners.clear();
-        algorithmStatusListeners.clear();
-        mConnector.disConnect();
-        if (!isMQTTConnect()) {
-            getAlgorithmManager().closeAlgorithm();
-        }
-        mTempManager.remove(patchMacaddress);
-        mContext.registerReceiver(mNetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        mContext.unregisterReceiver(mNetReceiver);
+        mHandle.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //        Logger.w("手动断开连接:", patchMacaddress);
+                Log.w(TAG, "手动断开连接:" + patchMacaddress);
+                checkConnector();
+                mCurrentTempDataList.clear();
+                mSamples.clear();
+                mConnectionType.clear();
+                //取消重连
+                mCurrentTemp = new TempDataBean();
+                mAllTemps.clear();
+                isAutoReconnect = false;
+                for (ConnectStatusListener listener : connectStatusListeners) {
+                    listener.onDisconnect(true);
+                }
+                connectStatusListeners.clear();
+                mDataListeners.clear();
+                algorithmStatusListeners.clear();
+                mConnector.disConnect();
+                if (!isMQTTConnect()) {
+                    getAlgorithmManager().closeAlgorithm();
+                }
+                mTempManager.remove(patchMacaddress);
+                mContext.registerReceiver(mNetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+                mContext.unregisterReceiver(mNetReceiver);
+            }
+        },1000);
     }
 
     public TempConnectorManager addConnectionTypeListener(ConnectionTypeListener listener) {
@@ -1065,7 +1092,7 @@ public class TempConnectorManager {
     public static void close() {
         Map<String, TempConnectorManager> managerMap = new HashMap<>(mTempManager);
         for (String mac : managerMap.keySet()) {
-            Objects.requireNonNull(mTempManager.get(mac)).disConnect();
+                Objects.requireNonNull(mTempManager.get(mac)).disConnect();
         }
         managerMap.clear();
     }

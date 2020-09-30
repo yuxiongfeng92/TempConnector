@@ -2,6 +2,7 @@ package com.proton.temp.connector.broadcast;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.proton.temp.connector.bean.DeviceBean;
 import com.proton.temp.connector.bean.DeviceType;
@@ -15,7 +16,7 @@ import com.wms.ble.bean.ScanResult;
 import com.wms.ble.callback.OnScanListener;
 import com.wms.ble.utils.BluetoothUtils;
 import com.wms.ble.utils.ScanManager;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +27,7 @@ import java.util.TimerTask;
  * 广播方式连接
  */
 public class BroadcastConnector implements Connector {
+    public static final String TAG = "temp_connector : ";
     private String macaddress;
     private ConnectStatusListener connectStatusListener = new ConnectStatusListener() {
         @Override
@@ -117,17 +119,20 @@ public class BroadcastConnector implements Connector {
 
             //判断是否需要过滤掉第一包数据
             if (isFilterFirstInvalidPackageData ) {
-                Logger.w("蓝牙连接切换到蓝牙广播，过滤掉第一包数据");
+//                Logger.w("蓝牙连接切换到蓝牙广播，过滤掉第一包数据");
+                Log.w(TAG,"蓝牙连接切换到蓝牙广播，过滤掉第一包数据");
                 isFilterFirstInvalidPackageData = false;
                 return;
             }
             int packageNum = BroadcastUtils.getPackageNumber(scanRecord);
             if (packageNum == mLastPackageNumber) return;
             if (packageNum - mLastPackageNumber != 1 && mLastPackageNumber != -1) {
-                Logger.w("丢包了:", macaddress);
+//                Logger.w("丢包了:", macaddress);
+                Log.w(TAG,"丢包了:"+ macaddress);
             }
             mLastPackageNumber = packageNum;
-            Logger.w("包序:", packageNum, ",mac:", macaddress);
+//            Logger.w("包序:", packageNum, ",mac:", macaddress);
+            Log.w(TAG,"包序:"+ packageNum+ ",mac:"+ macaddress);
             //包序
             dataListener.receivePackageNumber(mLastPackageNumber);
 
@@ -219,7 +224,8 @@ public class BroadcastConnector implements Connector {
             @Override
             public void run() {
                 if (mConnectStatusTimer == null) return;
-                Logger.w("广播连接状态定时器");
+//                Logger.w("广播连接状态定时器");
+                Log.w(TAG,"广播连接状态定时器");
                 if ((mLastReceiveDataTime != 0 && System.currentTimeMillis() - mLastReceiveDataTime >= disconnectTimeout)
                         || !BluetoothUtils.isBluetoothOpened()) {
                     //没收到数据就回调断开
@@ -266,7 +272,8 @@ public class BroadcastConnector implements Connector {
 
     @Override
     public boolean isConnected() {
-        Logger.w("是否连接hasCallbackConnectSuccess:" + hasCallbackConnectSuccess);
+//        Logger.w("是否连接hasCallbackConnectSuccess:" + hasCallbackConnectSuccess);
+        Log.w(TAG,"是否连接hasCallbackConnectSuccess:" + hasCallbackConnectSuccess);
         return hasCallbackConnectSuccess;
     }
 

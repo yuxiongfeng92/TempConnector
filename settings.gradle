@@ -1,2 +1,2 @@
-include ':app', ':tempConnector'
+include ':app', ':tempConnector', ':tempAlgorithm', ':ble'
 rootProject.name='TempConnector'

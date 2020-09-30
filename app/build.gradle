@@ -17,8 +17,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
-
+repositories {
+    flatDir {
+        dirs 'libs'   // aar目录
+    }
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -26,9 +34,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-//    implementation project(':tempConnector')
-//    implementation 'com.proton.temp:tempConnector:1.0.3'
     implementation 'com.yxf.util:blufili:1.0.5-alpha2'
-    implementation 'com.yxf.glideimageview:GlideImageView:1.0.0-alpha04'
-
+//    implementation 'com.yxf.glideimageview:GlideImageView:1.0.0-alpha04'
+//    implementation'com.proton.temp:tempConnector:1.0.6-alpha04'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.3'
+    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
+    implementation project(':tempConnector')
+    implementation 'com.wms:logger:1.0.1'
 }

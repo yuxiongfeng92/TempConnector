@@ -7,7 +7,7 @@ import com.proton.temp.connector.bean.MQTTConfig;
 import com.proton.temp.connector.interfaces.ConnectStatusListener;
 import com.proton.temp.connector.interfaces.Connector;
 import com.proton.temp.connector.interfaces.DataListener;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.util.HashMap;
 
@@ -71,7 +71,7 @@ public class MQTTConnector implements Connector {
     public void disConnect() {
         mMqttManager.disConnect(macaddress);
         mqttConnectorMap.remove(macaddress);
-        Logger.w("mqtt连接器:", mqttConnectorMap.size());
+//        Logger.w("mqtt连接器:", mqttConnectorMap.size());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MQTTConnector implements Connector {
 
     @Override
     public void cancelConnect() {
-        Logger.w("取消连接");
+//        Logger.w("取消连接");
         disConnect();
     }
 

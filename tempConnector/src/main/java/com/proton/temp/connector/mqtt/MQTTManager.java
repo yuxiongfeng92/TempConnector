@@ -14,7 +14,7 @@ import com.proton.temp.connector.interfaces.ConnectStatusListener;
 import com.proton.temp.connector.interfaces.DataListener;
 import com.proton.temp.connector.utils.ConnectorSetting;
 import com.proton.temp.connector.utils.Utils;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -91,7 +91,7 @@ public class MQTTManager {
         @Override
         public void connectionLost(Throwable cause) {
             //断线了，重连
-            Logger.w("mqtt服务掉线了:", cause != null ? cause.getMessage() : "");
+//            Logger.w("mqtt服务掉线了:", cause != null ? cause.getMessage() : "");
             reConnect();
         }
 
@@ -99,7 +99,7 @@ public class MQTTManager {
         public void messageArrived(String topic, MqttMessage message) {
             String mac = Utils.getMacAddressByTopic(topic);
             String data = new String(message.getPayload());
-            Logger.w("收到数据:", data, ",mac = ", mac);
+//            Logger.w("收到数据:", data, ",mac = ", mac);
             if (TextUtils.isEmpty(data)) return;
             ConnectorListener connectorListener = mConnectListeners.get(mac);
             if (connectorListener == null) return;
@@ -145,7 +145,7 @@ public class MQTTManager {
 
         @Override
         public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-            Logger.w("mqtt连接失败:", exception, ",缓存topic:", mCacheTopics.size());
+//            Logger.w("mqtt连接失败:", exception, ",缓存topic:", mCacheTopics.size());
             if (exception instanceof MqttException && ((MqttException) exception).getReasonCode() == 32100) {
                 //已经连接直接订阅
                 dealWithCacheTopic();
@@ -188,7 +188,7 @@ public class MQTTManager {
      * 连接MQTT服务器
      */
     private void connectMQTTServer() {
-        Logger.w("clientId:", CLIENTID);
+//        Logger.w("clientId:", CLIENTID);
         if (mMQTTConfig == null || TextUtils.isEmpty(mMQTTConfig.getServerUrl())) {
             throw new IllegalArgumentException("mqtt server can not be null");
         }
@@ -206,14 +206,14 @@ public class MQTTManager {
         mqttConnectOptions.setPassword(mMQTTConfig.getPassword().toCharArray());
 
         if (mMQTTClient.isConnected()) {
-            Logger.w("mqtt已经连接");
+//            Logger.w("mqtt已经连接");
             return;
         }
         try {
-            Logger.w("mqtt准备连接");
+//            Logger.w("mqtt准备连接");
             mMQTTClient.connect(mqttConnectOptions, null, mMqttConnectCallback);
         } catch (Exception e) {
-            Logger.w("连接异常:", e.getMessage());
+//            Logger.w("连接异常:", e.getMessage());
             reConnect();
         }
     }
@@ -237,16 +237,16 @@ public class MQTTManager {
                 macaddress = Utils.parseBssid2Mac(macaddress);
             }
             macaddress = macaddress.toUpperCase();
-            Logger.w("准备订阅:", macaddress);
+//            Logger.w("准备订阅:", macaddress);
             if (isConnected(macaddress)) {
-                Logger.w("mqtt已经连接了:", macaddress);
+//                Logger.w("mqtt已经连接了:", macaddress);
                 return;
             }
             //判断mqtt是否连接
             if (mMQTTClient == null || !mMQTTClient.isConnected()) {
                 //没有连接
                 mCacheTopics.put(macaddress, new ConnectorListener(connectStatusListener, dataListener));
-                Logger.w("mqtt没有连接,缓存topic:", mCacheTopics.size());
+//                Logger.w("mqtt没有连接,缓存topic:", mCacheTopics.size());
                 connectMQTTServer();
                 return;
             }
@@ -255,7 +255,7 @@ public class MQTTManager {
             //订阅状态
             mMQTTClient.subscribe(Utils.getWillTopicByMacAddress(macaddress), 0);
             mMQTTClient.subscribe(Utils.getPatchDisconnectTopicByMacAddress(macaddress), 0);
-            Logger.w("mqtt订阅成功:", topic);
+//            Logger.w("mqtt订阅成功:", topic);
             //存储订阅的主题
             hasSubscribe.add(macaddress);
             //存储连接器
@@ -271,7 +271,7 @@ public class MQTTManager {
             //开始计时器
             initTimer();
         } catch (MqttException e) {
-            Logger.w("mqtt订阅失败:", e.getMessage());
+//            Logger.w("mqtt订阅失败:", e.getMessage());
             if (connectStatusListener != null) {
                 connectStatusListener.onConnectFaild();
             }
@@ -285,7 +285,7 @@ public class MQTTManager {
         } else {
             listenerMap = new HashMap<>(mCacheTopics);
         }
-        Logger.w("监听器数量:", listenerMap.size(), ",是否联网:", Utils.isConnected(mContext));
+//        Logger.w("监听器数量:", listenerMap.size(), ",是否联网:", Utils.isConnected(mContext));
         for (String mac : listenerMap.keySet()) {
             disConnectInternal(mac, true, false);
         }
@@ -293,7 +293,7 @@ public class MQTTManager {
             if (Utils.isConnected(mContext)) {
                 connect(mac, listenerMap.get(mac).getConnectStatusListener(), listenerMap.get(mac).getDataListener());
             } else {
-                Logger.w("mqtt没联网，不连接");
+//                Logger.w("mqtt没联网，不连接");
                 mCacheTopics.put(mac, listenerMap.get(mac));
             }
         }
@@ -305,7 +305,7 @@ public class MQTTManager {
     public void disConnect(String macaddress) {
         disConnectInternal(macaddress, true, true);
         if (hasSubscribe.size() <= 0) {
-            Logger.w("关闭网络定时器");
+//            Logger.w("关闭网络定时器");
             if (mNetTimer != null) {
                 mNetTimer.cancel();
             }
@@ -331,13 +331,13 @@ public class MQTTManager {
             if (isResetTime) {
                 resetTime(macaddress);
             }
-            Logger.w("取消mqtt订阅成功:", macaddress, ",hasSubscribe大小:", hasSubscribe.size(), ",清除监听器:", clearListener);
+//            Logger.w("取消mqtt订阅成功:", macaddress, ",hasSubscribe大小:", hasSubscribe.size(), ",清除监听器:", clearListener);
             if (hasSubscribe.size() <= 0) {
                 clear();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.w("取消mqtt订阅失败:", macaddress);
+//            Logger.w("取消mqtt订阅失败:", macaddress);
         }
     }
 
@@ -370,11 +370,11 @@ public class MQTTManager {
             @Override
             public void run() {
                 if (System.currentTimeMillis() - mLastTimerTime > 20000) {
-                    Logger.w("定时器被冻结了");
+//                    Logger.w("定时器被冻结了");
                     mLastTimerTime = System.currentTimeMillis();
                     return;
                 }
-                Logger.w("mqtt定时器,网络是否连接", Utils.isConnected(mContext), ",监听器个数:", mConnectListeners.size());
+//                Logger.w("mqtt定时器,网络是否连接", Utils.isConnected(mContext), ",监听器个数:", mConnectListeners.size());
                 checkDisconnect();
                 mLastTimerTime = System.currentTimeMillis();
             }
@@ -393,10 +393,10 @@ public class MQTTManager {
                 tempHash = mLastReceiveDataTime;
                 for (final String macaddress : tempHash.keySet()) {
                     long timeInterval = System.currentTimeMillis() - tempHash.get(macaddress);
-                    Logger.w("timeInterval is : ", timeInterval);
+//                    Logger.w("timeInterval is : ", timeInterval);
                     if (mConnectListeners.get(macaddress) != null) {
                         if (timeInterval > disconnectTimeOut) {
-                            Logger.w("mqtt数据接收超时了:", macaddress, ",上次接收数据时间:", tempHash.get(macaddress), ",监听器:", mConnectListeners.size());
+//                            Logger.w("mqtt数据接收超时了:", macaddress, ",上次接收数据时间:", tempHash.get(macaddress), ",监听器:", mConnectListeners.size());
                             disConnectInternal(macaddress, false, true);
                             mConnectListeners.get(macaddress).getConnectStatusListener().onDisconnect(false);
                         } else if (timeInterval >= DISCONNECT_TIME_OUT_NOT_DISCONNECT) {
@@ -447,10 +447,10 @@ public class MQTTManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.e(e);
+//            Logger.e(e);
         }
         mInstance = null;
-        Logger.w("mqtt服务销毁");
+//        Logger.w("mqtt服务销毁");
     }
 
     private static native void initDefaultMQTTConfig();

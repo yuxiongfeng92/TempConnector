@@ -4,7 +4,7 @@ import com.proton.temp.connector.bean.DeviceType;
 import com.proton.temp.connector.bean.TempDataBean;
 import com.proton.temp.connector.bluetooth.utils.BleUtils;
 import com.wms.ble.bean.ScanResult;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

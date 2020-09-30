@@ -1,10 +1,11 @@
 package com.proton.temp.connector.bluetooth.utils;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.proton.temp.connector.bean.DockerDataBean;
 import com.proton.temp.connector.bean.TempDataBean;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 
 public class BleUtils {
-
+    public static final String TAG = "temp_connector : ";
     /**
      * Convert hex string to byte[]
      *
@@ -115,7 +116,9 @@ public class BleUtils {
                 } else {
                     sample = 24;
                 }
-                Logger.w("实时温度:", temp, ", sample:", sample);
+//                Logger.w("实时温度:", temp, ", sample:", sample);
+                Log.w(TAG,"实时温度:"+ temp+ ", sample:"+ sample);
+
                 temps.add(new TempDataBean(temp, sample));
             }
         }

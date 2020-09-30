@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.proton.temp.connector.R;
 import com.proton.temp.connector.bean.DeviceType;
@@ -24,7 +25,7 @@ import com.wms.ble.callback.OnWriteCharacterListener;
 import com.wms.ble.operator.FastBleOperator;
 import com.wms.ble.operator.IBleOperator;
 import com.wms.ble.utils.BluetoothUtils;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,6 +38,7 @@ import java.io.IOException;
  * <p/>
  */
 public class FirewareUpdateManager {
+    public static final String TAG = "temp_connector : ";
 
     /**
      * 数据解析
@@ -102,7 +104,8 @@ public class FirewareUpdateManager {
                 int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
                 switch (blueState) {
                     case BluetoothAdapter.STATE_TURNING_OFF:
-                        Logger.w("固件更新:蓝牙关闭");
+//                        Logger.w("固件更新:蓝牙关闭");
+                        Log.w(TAG,"固件更新:蓝牙关闭");
                         updateFail(getString(R.string.connector_please_open_bluetooth), UpdateFailType.BLUETOOTH_NOT_OPEN);
                         break;
                 }
@@ -151,8 +154,11 @@ public class FirewareUpdateManager {
                 mFileBytes = toByteArray(filePath);
                 mFileSize = mFileBytes.length;
                 connectDeviceMac = result.getDevice().getAddress();
-                Logger.w("固件升级:connectDeviceMac:", connectDeviceMac);
-                Logger.w("固件升级:广播包:", BleUtils.bytesToHexString(result.getScanRecord()));
+//                Logger.w("固件升级:connectDeviceMac:", connectDeviceMac);
+                Log.w(TAG,"固件升级:connectDeviceMac:"+ connectDeviceMac);
+//                Logger.w("固件升级:广播包:", BleUtils.bytesToHexString(result.getScanRecord()));
+                Log.w(TAG,"固件升级:广播包:"+ BleUtils.bytesToHexString(result.getScanRecord()));
+
 
                 if (isFirstScan && !judgeOad(result)) {
                     judgeBattery();
@@ -177,7 +183,8 @@ public class FirewareUpdateManager {
 
             @Override
             public void onConnectFaild() {
-                Logger.w("固件升级:连接失败:", mac);
+//                Logger.w("固件升级:连接失败:", mac);
+                Log.w(TAG,"固件升级:连接失败:"+ mac);
                 if (mac.equals(UPDATE_MACADDRESS)) {
                     updateFail(getString(R.string.connector_connect_fail), UpdateFailType.CONNECT_FAIL);
                 } else {
@@ -209,7 +216,8 @@ public class FirewareUpdateManager {
         if (type != DeviceType.None) {
             String deviceName = result.getDevice().getName();
             if ("OAD THEM".equals(deviceName)) {
-                Logger.w("oad模式升级不需要判断电量");
+//                Logger.w("oad模式升级不需要判断电量");
+                Log.w(TAG,"oad模式升级不需要判断电量");
                 return true;
             }
         }
@@ -276,13 +284,15 @@ public class FirewareUpdateManager {
 
             @Override
             public void onSuccess() {
-                Logger.w("订阅成功");
+//                Logger.w("订阅成功");
+                Log.w(TAG,"订阅成功");
                 write(0, null);
             }
 
             @Override
             public void onFail() {
-                Logger.w("订阅失败");
+//                Logger.w("订阅失败");
+                Log.w(TAG,"订阅失败");
                 updateFail(getString(R.string.connector_fireware_write_fail), UpdateFailType.SUBSCRIBE_FAIL);
             }
 
@@ -332,7 +342,8 @@ public class FirewareUpdateManager {
             if (index == mFileSize / buffSize - 1) {
                 onFirewareStatusListener.onUpdateVerifyComplete();
                 onFirewareUpdateListener.onSuccess(deviceType, connectDeviceMac);
-                Logger.w("升级总耗时:", (System.currentTimeMillis() - startTime));
+//                Logger.w("升级总耗时:", (System.currentTimeMillis() - startTime));
+                Log.w(TAG,"升级总耗时:"+ (System.currentTimeMillis() - startTime));
             }
         }
     }
@@ -374,7 +385,8 @@ public class FirewareUpdateManager {
         bleOperator.write(connectDeviceMac, SERVICE_RESET, CHARACTOR_RESET, BleUtils.hexStringToBytes("01"), new OnWriteCharacterListener() {
             @Override
             public void onSuccess() {
-                Logger.w("固件升级:重置成功");
+//                Logger.w("固件升级:重置成功");
+                Log.w(TAG,"固件升级:重置成功");
                 hasResetDevice = true;
                 bleOperator.disConnect(connectDeviceMac);
                 scanDevice(connectDeviceMac);
@@ -382,7 +394,8 @@ public class FirewareUpdateManager {
 
             @Override
             public void onFail() {
-                Logger.w("固件升级:重置失败");
+//                Logger.w("固件升级:重置失败");
+                Log.w(TAG,"固件升级:重置失败");
                 uploadData();
             }
         });

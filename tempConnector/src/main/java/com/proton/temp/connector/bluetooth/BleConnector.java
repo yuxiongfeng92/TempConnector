@@ -3,6 +3,7 @@ package com.proton.temp.connector.bluetooth;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.proton.temp.connector.bean.DeviceBean;
 import com.proton.temp.connector.bean.DeviceType;
@@ -29,7 +30,7 @@ import com.wms.ble.operator.IBleOperator;
 import com.wms.ble.operator.WmsBleOperator;
 import com.wms.ble.utils.BluetoothUtils;
 import com.wms.ble.utils.ScanManager;
-import com.wms.logger.Logger;
+//import com.wms.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,8 @@ import java.util.TimerTask;
  * ble设备管理器
  */
 public class BleConnector implements Connector {
+    public static final String TAG = "temp_connector : ";
+
     /**
      * 设备管理器存储
      */
@@ -99,11 +102,6 @@ public class BleConnector implements Connector {
      * 是否是1.5版本蓝牙，目前体温贴包含两个蓝牙版本，处理方式不一样
      */
     private boolean isV1_5;
-
-    /**
-     * 从第二次开始接收数据的时候开始检测体温贴是否断裂
-     */
-    private boolean isFirstCheckPatchEnable = true;
 
     private BleConnector(Context context, String macaddress, boolean isV1_5) {
         if (context != null) {
@@ -189,7 +187,8 @@ public class BleConnector implements Connector {
 
             @Override
             public void onDisconnect(boolean isManual) {
-                Logger.w("设备断开连接了");
+//                Logger.w("设备断开连接了");
+                Log.w(TAG, "设备断开连接了");
                 if (connectStatusListener != null) {
                     connectStatusListener.onDisconnect(false);
                 }
@@ -270,10 +269,12 @@ public class BleConnector implements Connector {
             @Override
             public void onReadCacheFinish() {
                 if (isV1_5) {
-                    Logger.w("v1.5固件设备");
+//                    Logger.w("v1.5固件设备");
+                    Log.w(TAG, "v1.5固件设备");
                     subscribeTempNotification();
                 } else {
-                    Logger.w("v1.0固件设备");
+//                    Logger.w("v1.0固件设备");
+                    Log.w(TAG, "v1.0固件设备");
                     startGetTempTimer();
                 }
             }
@@ -305,11 +306,13 @@ public class BleConnector implements Connector {
      * 获取当前的温度
      */
     public void getCurrentTemp() {
-        Logger.w("读温度");
+//        Logger.w("读温度");
+        Log.w(TAG, "读温度");
         mBleOperator.read(macaddress, deviceUUID.getServiceTemp(), deviceUUID.getCharactorTemp(), new OnReadCharacterListener() {
             @Override
             public void onFail() {
-                Logger.w("读温度失败");
+//                Logger.w("读温度失败");
+                Log.w(TAG, "读温度失败");
             }
 
             @Override
@@ -326,7 +329,8 @@ public class BleConnector implements Connector {
      * 3，写一个值0x02用来获取包数据
      */
     public void getCacheTemp() {
-        Logger.w("获取缓存");
+//        Logger.w("获取缓存");
+        Log.w(TAG, "获取缓存");
         subscribeCacheTempNotification();
         mGetCacheTempWriteValue = "01";
         writeCacheTemp(BleUtils.hexStringToBytes(mGetCacheTempWriteValue));
@@ -347,13 +351,15 @@ public class BleConnector implements Connector {
             @Override
             public void onFail() {
                 super.onFail();
-                Logger.w("写缓存失败:", mGetCacheTempWriteValue);
+//                Logger.w("写缓存失败:", mGetCacheTempWriteValue);
+                Log.w(TAG, "写缓存失败:" + mGetCacheTempWriteValue);
             }
 
             @Override
             public void onSuccess() {
                 super.onSuccess();
-                Logger.w("写缓存成功:", mGetCacheTempWriteValue);
+//                Logger.w("写缓存成功:", mGetCacheTempWriteValue);
+                Log.w(TAG, "写缓存成功:" + mGetCacheTempWriteValue);
             }
         });
     }
@@ -368,17 +374,17 @@ public class BleConnector implements Connector {
             @Override
             public void run() {
                 if (isV1_5) {
-                    mReceiverDataListener.receiveCurrentTemp(dataParse.parseTempV1_5(data));
+                    if (mReceiverDataListener != null) {
+                        mReceiverDataListener.receiveCurrentTemp(dataParse.parseTempV1_5(data));
+                    }
                 } else {
-                    mReceiverDataListener.receiveCurrentTemp(dataParse.parseTemp(data));
+                    if (mReceiverDataListener != null) {
+                        mReceiverDataListener.receiveCurrentTemp(dataParse.parseTemp(data));
+                    }
                 }
-
-                if (!isFirstCheckPatchEnable) {
+                if (mReceiverDataListener != null) {
                     mReceiverDataListener.judgeCarepatchEnable(judgeCarepatchEnableByBluetooth(data));
                 }
-                isFirstCheckPatchEnable = false;
-
-
             }
         });
     }
@@ -412,12 +418,14 @@ public class BleConnector implements Connector {
 
             @Override
             public void onSuccess() {
-                Logger.w("温度订阅成功");
+                Log.w(TAG, "温度订阅成功:");
+//                Logger.w("温度订阅成功");
             }
 
             @Override
             public void onFail() {
-                Logger.w("温度订阅失败");
+                Log.w(TAG, "温度订阅失败:");
+//                Logger.w("温度订阅失败");
             }
         });
         return this;
@@ -435,12 +443,14 @@ public class BleConnector implements Connector {
 
             @Override
             public void onSuccess() {
-                Logger.w("电量订阅成功");
+                Log.w(TAG, "电量订阅成功:");
+//                Logger.w("电量订阅成功");
             }
 
             @Override
             public void onFail() {
-                Logger.w("电量订阅失败");
+                Log.w(TAG, "电量订阅失败:");
+//                Logger.w("电量订阅失败");
             }
         });
         return this;
@@ -458,12 +468,14 @@ public class BleConnector implements Connector {
 
             @Override
             public void onSuccess() {
-                Logger.w("缓存订阅成功");
+                Log.w(TAG, "缓存订阅成功:");
+//                Logger.w("缓存订阅成功");
             }
 
             @Override
             public void onFail() {
-                Logger.w("缓存订阅失败");
+                Log.w(TAG, "缓存订阅失败:");
+//                Logger.w("缓存订阅失败");
             }
         });
         return this;
@@ -485,7 +497,8 @@ public class BleConnector implements Connector {
             //获取缓存的数量
             String countString = BleUtils.bytesToHexString(value).substring(0, 4);
             mCacheTempCount = Integer.parseInt(countString.substring(2, 4) + countString.substring(0, 2), 16);
-            Logger.w("缓存温度大小:", mCacheTempCount);
+//            Logger.w("缓存温度大小:", mCacheTempCount);
+            Log.w(TAG, "缓存温度大小:" + mCacheTempCount);
             if (dataListener != null) {
                 dataListener.receiveCacheTotal(mCacheTempCount);
             }
@@ -520,7 +533,8 @@ public class BleConnector implements Connector {
             }
         }
 
-        Logger.w("获取到了缓存温度:", mCacheTemps.size());
+//        Logger.w("获取到了缓存温度:", mCacheTemps.size());
+        Log.w(TAG, "获取到了缓存温度:" + mCacheTemps.size());
     }
 
     /**
@@ -555,7 +569,8 @@ public class BleConnector implements Connector {
                 if (mReceiverDataListener != null) {
                     Integer battery = dataParse.parseBattery(value);
                     boolean isCharge = dataParse.parseCharge(value);
-                    Logger.w("电池:", battery, ",isCharge:", isCharge);
+//                    Logger.w("电池:", battery, ",isCharge:", isCharge);
+                    Log.w(TAG, "电池:" + battery + ",isCharge:" + isCharge);
                     mReceiverDataListener.receiveBattery(battery);
                     mReceiverDataListener.receiveCharge(isCharge);
                 }
@@ -624,10 +639,12 @@ public class BleConnector implements Connector {
             @Override
             public void run() {
                 if (isConnected() && mBleOperator != null) {
-                    Logger.w("蓝牙断开失败，开启定时器重复断开");
+//                    Logger.w("蓝牙断开失败，开启定时器重复断开");
+                    Log.w(TAG, "蓝牙断开失败，开启定时器重复断开");
                     disconnectFailRes();
                 } else {
-                    Logger.w("成功断开蓝牙连接。。。");
+//                    Logger.w("成功断开蓝牙连接。。。");
+                    Log.w(TAG, "成功断开蓝牙连接。。。");
                 }
             }
         }, 2000);
@@ -647,8 +664,10 @@ public class BleConnector implements Connector {
     @Override
     public void setSampleRate(int sampleRate) {
         //采样频率变动
-        Logger.w("当前采样:", mCurrentSampleRate, ",调整采样:"
-                , sampleRate, ",mac = ", macaddress, ",", (isV1_5 ? "p03设备" : "p02设备"));
+//        Logger.w("当前采样:", mCurrentSampleRate, ",调整采样:"
+//                , sampleRate, ",mac = ", macaddress, ",", (isV1_5 ? "p03设备" : "p02设备"));
+        Log.w(TAG, "当前采样:" + mCurrentSampleRate + ",调整采样:"
+                + sampleRate + ",mac = " + macaddress + "," + (isV1_5 ? "p03设备" : "p02设备"));
         if (sampleRate == mCurrentSampleRate || sampleRate <= 0) return;
         mCurrentSampleRate = sampleRate;
         if (isV1_5) {
@@ -676,12 +695,14 @@ public class BleConnector implements Connector {
         writeCacheTemp(BleUtils.hexStringToBytes(data), new OnWriteCharacterListener() {
             @Override
             public void onSuccess() {
-                Logger.w("调整采样成功:", sampleRate);
+//                Logger.w("调整采样成功:", sampleRate);
+                Log.w(TAG, "调整采样成功:" + sampleRate);
             }
 
             @Override
             public void onFail() {
-                Logger.w("调整采样失败:", sampleRate);
+//                Logger.w("调整采样失败:", sampleRate);
+                Log.w(TAG, "调整采样失败:" + sampleRate);
             }
         });
     }
@@ -716,7 +737,8 @@ public class BleConnector implements Connector {
         mCycDisconnectTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Logger.w("蓝牙断开失败，开启定时器重复断开，断开次数 ：", disconnectCount, "次");
+//                Logger.w("蓝牙断开失败，开启定时器重复断开，断开次数 ：", disconnectCount, "次");
+                Log.w(TAG, "蓝牙断开失败，开启定时器重复断开，断开次数 ：" + disconnectCount + "次");
                 disconnectCount++;
                 mBleOperator.disConnect(macaddress);
                 if (disconnectCount > disconnectTotalCount) {
