@@ -120,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
         BleConnector.stopScan();
         this.device=device;
         TempConnectorManager.getInstance(device)
-                .setConnectionType(ConnectionType.BLUETOOTH)//广播方式连接
-//                .setConnectionType(ConnectionType.BLUETOOTH)//蓝牙方式连接
+//                .setConnectionType(ConnectionType.BROADCAST)//广播方式连接
+                .setConnectionType(ConnectionType.BLUETOOTH)//蓝牙方式连接
                 .connect(connectStatusListener, dataLisener, true);
 
     }

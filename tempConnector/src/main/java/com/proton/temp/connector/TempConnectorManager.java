@@ -166,7 +166,7 @@ public class TempConnectorManager {
      */
     private boolean isBluetooth2Broadcast = false;
 
-    private Handler mHandle=new Handler(Looper.getMainLooper());
+    private Handler mHandle = new Handler(Looper.getMainLooper());
 
     /**
      * 算法数据接收
@@ -769,7 +769,6 @@ public class TempConnectorManager {
         mHandle.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //        Logger.w("手动断开连接:", patchMacaddress);
                 Log.w(TAG, "手动断开连接:" + patchMacaddress);
                 checkConnector();
                 mCurrentTempDataList.clear();
@@ -793,7 +792,7 @@ public class TempConnectorManager {
                 mContext.registerReceiver(mNetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
                 mContext.unregisterReceiver(mNetReceiver);
             }
-        },1000);
+        }, mConnector.isConnected() ? 0 : 3000);
     }
 
     public TempConnectorManager addConnectionTypeListener(ConnectionTypeListener listener) {
@@ -1092,7 +1091,7 @@ public class TempConnectorManager {
     public static void close() {
         Map<String, TempConnectorManager> managerMap = new HashMap<>(mTempManager);
         for (String mac : managerMap.keySet()) {
-                Objects.requireNonNull(mTempManager.get(mac)).disConnect();
+            Objects.requireNonNull(mTempManager.get(mac)).disConnect();
         }
         managerMap.clear();
     }

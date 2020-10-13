@@ -395,9 +395,8 @@ public class BleConnector implements Connector {
      * @param tempData
      * @return
      */
-    public static boolean judgeCarepatchEnableByBluetooth(byte[] tempData) {
-        String temp = BleUtils.bytesToHexString(tempData);
-        if (temp.equalsIgnoreCase("3fff")) {
+      public static boolean judgeCarepatchEnableByBluetooth(byte[] tempData) {
+          if (BleUtils.bytesToHexStringTemp(tempData).equalsIgnoreCase("ffff")) {
             return false;
         }
         return true;
@@ -535,28 +534,6 @@ public class BleConnector implements Connector {
 
 //        Logger.w("获取到了缓存温度:", mCacheTemps.size());
         Log.w(TAG, "获取到了缓存温度:" + mCacheTemps.size());
-    }
-
-    /**
-     * x2和x1中间间隔n个点的处理方式
-     * 一共有n+1个间隔
-     * del = x2-x1;
-     * a = del/n/(n+1);
-     * k = del/2/(n+1);
-     * x(i)=x(i-1)+k+(n-i+1)*a;;
-     */
-    private List<Float> fillCacheData(float first, float second, int fillCount) {
-        float delta = second - first;
-        float a = delta / fillCount / (fillCount + 1);
-        float k = delta / 2 / (fillCount + 1);
-
-        List<Float> tempList = new ArrayList<>();
-        float temp = first;
-        for (int i = 0; i < fillCount; i++) {
-            temp = temp + k + (fillCount - i) * a;
-            tempList.add(temp);
-        }
-        return tempList;
     }
 
     /**
